@@ -26,28 +26,30 @@ public class TestSearcher {
 	public IType[] findAll(IJavaProject project, IProgressMonitor pm)
 			throws JavaModelException {
 
-//		IType[] candidates1 = getAllTestCaseSubclasses(project, pm);
-//		IType[] candidates2 = getTestCaseClasses(project);
-//
-//		IType[] allCandidates = new IType[candidates1.length
-//				+ candidates2.length];
-//		System.arraycopy(candidates1, 0, allCandidates, 0, candidates1.length);
-//		System.arraycopy(candidates2, 0, allCandidates, candidates1.length,
-//				candidates2.length);
+		// IType[] candidates1 = getAllTestCaseSubclasses(project, pm);
+		// IType[] candidates2 = getTestCaseClasses(project);
+		//
+		// IType[] allCandidates = new IType[candidates1.length
+		// + candidates2.length];
+		// System.arraycopy(candidates1, 0, allCandidates, 0,
+		// candidates1.length);
+		// System.arraycopy(candidates2, 0, allCandidates, candidates1.length,
+		// candidates2.length);
 
 		IType[] allCandidates = getTestCaseClasses(project);
 
 		return collectTestsInProject(allCandidates, project);
 	}
-//
-//	private IType[] getAllTestCaseSubclasses(IJavaProject project,
-//			IProgressMonitor pm) throws JavaModelException {
-//		IType testCase = project.findType("junit.framework.TestCase");
-//		if (testCase == null)
-//			return new IType[0];
-//		ITypeHierarchy hierarchy = testCase.newTypeHierarchy(project, pm);
-//		return hierarchy.getAllSubtypes(testCase);
-//	}
+
+	//
+	// private IType[] getAllTestCaseSubclasses(IJavaProject project,
+	// IProgressMonitor pm) throws JavaModelException {
+	// IType testCase = project.findType("junit.framework.TestCase");
+	// if (testCase == null)
+	// return new IType[0];
+	// ITypeHierarchy hierarchy = testCase.newTypeHierarchy(project, pm);
+	// return hierarchy.getAllSubtypes(testCase);
+	// }
 
 	private IType[] collectTestsInProject(IType[] candidates,
 			IJavaProject project) {
@@ -73,7 +75,7 @@ public class TestSearcher {
 		return !Flags.isAbstract(type.getFlags());
 	}
 
-	private IType[] getTestCaseClasses(IJavaProject project) {
+	private IType[] getTestCaseClasses(final IJavaProject project) {
 
 		final ArrayList<IType> list = new ArrayList<IType>();
 
@@ -81,51 +83,100 @@ public class TestSearcher {
 		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(
 				new IJavaElement[] { project }, false);
 
+		SearchPattern parentTestCase_ptn = SearchPattern.createPattern(
+				PreferenceUtil.getTestCaseNamePTN(),
+				IJavaSearchConstants.CLASS, IJavaSearchConstants.DECLARATIONS,
+				SearchPattern.R_PATTERN_MATCH);
 
-		// 検索パターン登録
+/*		// 検索パターン登録
+		SearchPattern pattern_TestCase = null;
+		SearchPattern tmp_pattern_TestCase;
+		boolean initFlg = true;
 
-		SearchPattern pattern_TestCase = SearchPattern.createPattern(
-				"HoipoiS2TestCase",
-				IJavaSearchConstants.CLASS,
-				IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE,
-				SearchPattern.R_REGEXP_MATCH);
+		for (String parentTestCase : PreferenceUtil.getParentTestCaseList()) {
 
-		SearchPattern pattern_RunWith = SearchPattern.createPattern(
+			tmp_pattern_TestCase = SearchPattern.createPattern(parentTestCase,
+					IJavaSearchConstants.CLASS,
+					IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE,
+					SearchPattern.R_EXACT_MATCH);
+
+			if (initFlg) {
+				pattern_TestCase = tmp_pattern_TestCase;
+				initFlg = false;
+				continue;
+			}
+
+			pattern_TestCase = SearchPattern.createOrPattern(pattern_TestCase,
+					tmp_pattern_TestCase);
+
+		}*/
+
+/*		SearchPattern pattern_RunWith = SearchPattern.createPattern(
 				"org.junit.runner.RunWith",
 				IJavaSearchConstants.ANNOTATION_TYPE,
 				IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_REGEXP_MATCH | SearchPattern.R_CASE_SENSITIVE);
+				SearchPattern.R_EXACT_MATCH);*/
 
-
-		// マッチング処理
+/*		// マッチング処理
 		SearchRequestor requestor_TestCase = new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) {
 				System.out.println(match.getElement());
 
-				if(!(match.getElement() instanceof IType)) return;
+				if (!(match.getElement() instanceof IType))
+					return;
 
 				IType type = (IType) match.getElement();
 				list.add(type);
 			}
+		};*/
+
+		SearchRequestor requestor_ParentTestCaseName = new SearchRequestor() {
+			public void acceptSearchMatch(SearchMatch match) {
+				System.out.println(match.getElement());
+
+				if (!(match.getElement() instanceof IType))
+					return;
+
+				IType type = (IType) match.getElement();
+				System.out.println("■" + type.getElementName());
+				try {
+					ITypeHierarchy ith = type.newSupertypeHierarchy(new NullProgressMonitor());
+					if(ith.contains(project.findType("junit.framework.TestCase"))){
+						System.out.println("!!!!! HIT !!!!!");
+					}
+				} catch (JavaModelException e) {
+					// TODO 自動生成された catch ブロック
+					e.printStackTrace();
+				}
+				list.add(type);
+			}
 		};
 
-		SearchRequestor requestor_RunWith = new SearchRequestor() {
+/*		SearchRequestor requestor_RunWith = new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) {
 				System.out.println(match.getElement());
 				IType type = (IType) match.getElement();
 				list.add(type);
 			}
-		};
-
+		};*/
 
 		try {
 			SearchEngine searchEngine = new SearchEngine();
 
-			searchEngine.search(pattern_RunWith, new SearchParticipant[] { SearchEngine
-					.getDefaultSearchParticipant() }, scope, requestor_RunWith, null);
+			searchEngine.search(parentTestCase_ptn,
+					new SearchParticipant[] { SearchEngine
+							.getDefaultSearchParticipant() }, scope,
+					requestor_ParentTestCaseName, null);
 
-			searchEngine.search(pattern_TestCase, new SearchParticipant[] { SearchEngine
-					.getDefaultSearchParticipant() }, scope, requestor_TestCase, null);
+/*			searchEngine.search(pattern_RunWith,
+					new SearchParticipant[] { SearchEngine
+							.getDefaultSearchParticipant() }, scope,
+					requestor_RunWith, null);
+
+			searchEngine.search(pattern_TestCase,
+					new SearchParticipant[] { SearchEngine
+							.getDefaultSearchParticipant() }, scope,
+					requestor_TestCase, null);*/
 
 		} catch (CoreException e) {
 			// TODO 自動生成された catch ブロック

@@ -50,7 +50,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="com.homeserver.tamutamu.autosuitegen.AutoSuiteGenPage"
+            class="com.homeserver.tamutamu.autosuitegen.AutoSuiteGenPreferencePage"
             id="jp.co.tis.xenlon.AutoSuiteGen.PreferencePage"
             name="Suite自動生成">
       </page>
