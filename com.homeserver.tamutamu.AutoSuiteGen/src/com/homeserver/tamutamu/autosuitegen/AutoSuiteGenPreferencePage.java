@@ -1,5 +1,10 @@
 package com.homeserver.tamutamu.autosuitegen;
 
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -16,8 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
-import com.homeserver.tamutamu.autosuitegen.dlgs.SelectSuperTestCaseDlg;
 import com.homeserver.tamutamu.autosuitegen.util.PreferenceUtil;
 
 public class AutoSuiteGenPreferencePage extends PreferencePage implements
@@ -34,6 +39,9 @@ public class AutoSuiteGenPreferencePage extends PreferencePage implements
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
 	}
 
+	/**
+	 * @wbp.parser.constructor
+	 */
 	public AutoSuiteGenPreferencePage(String title) {
 		super(title);
 	}
@@ -79,11 +87,13 @@ public class AutoSuiteGenPreferencePage extends PreferencePage implements
 
 		GridData superTestCaseList_gd = new GridData(GridData.FILL_HORIZONTAL);
 		superTestCaseList_gd.horizontalSpan = 2;
-		superTestCaseList_gd.heightHint = 120;
+		superTestCaseList_gd.heightHint = 80;
 		superTestCaseList = new List(gp2, SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.BORDER);
 		// superTestCaseList.setSize(2000, 200);
 		superTestCaseList.setLayoutData(superTestCaseList_gd);
+
+		this.doLoad();
 
 		Composite buttonComp = new Composite(gp2, SWT.NONE);
 		buttonComp.setLayout(new GridLayout(1, false));
@@ -96,17 +106,36 @@ public class AutoSuiteGenPreferencePage extends PreferencePage implements
 				.addSelectionListener(new org.eclipse.swt.events.SelectionAdapter() {
 					public void widgetSelected(
 							org.eclipse.swt.events.SelectionEvent e) {
-						final SelectSuperTestCaseDlg dlg = new SelectSuperTestCaseDlg(
-								new Shell(), "親テストクラスの選択");
-						if (dlg.open() == Dialog.OK) {
-							String superTestCaseClassName = dlg
-									.getSuperTestCaseClassName();
+						// final SelectSuperTestCaseDlg dlg = new
+						// SelectSuperTestCaseDlg(
+						// new Shell(), "親テストクラスの選択");
+						try {
+							SelectionDialog dialog;
 
-							superTestCaseList.setData(superTestCaseClassName,
-									superTestCaseClassName);
-							superTestCaseList.add(superTestCaseClassName);
-							superTestCaseList.select(superTestCaseList
-									.getItemCount() - 1);
+							dialog = JavaUI
+									.createTypeDialog(
+											new Shell(),
+											Activator.getDefault()
+													.getWorkbench()
+													.getActiveWorkbenchWindow(),
+											SearchEngine.createWorkspaceScope(),
+											IJavaElementSearchConstants.CONSIDER_CLASSES,
+											false);
+							dialog.setTitle("絞り込み対象の親クラスを選択");
+							if (dialog.open() == Dialog.OK) {
+								String superTestCaseClassName = ((IType)dialog.getResult()[0]).getFullyQualifiedName();
+
+								superTestCaseList.setData(
+										superTestCaseClassName,
+										superTestCaseClassName);
+								superTestCaseList.add(superTestCaseClassName);
+								superTestCaseList.select(superTestCaseList
+										.getItemCount() - 1);
+							}
+
+						} catch (JavaModelException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
 					}
 				});

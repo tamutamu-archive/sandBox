@@ -8,6 +8,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.graphics.Point;
 
 /**
  * HSQLAddDefinitionComposite
@@ -24,6 +25,7 @@ public class SelectSuperTestCaseComposite extends Composite {
 		super(parent, style);
 		GridLayout grl = new GridLayout(1, true);
 		this.setLayout(grl);
+		this.setLayoutData(new GridData(GridData.FILL_HORIZONTAL|GridData.FILL_VERTICAL));
 		initialize();
 	}
 
@@ -32,8 +34,9 @@ public class SelectSuperTestCaseComposite extends Composite {
 		labelDBName.setText("対象の親テストクラスのフルパッケージ＋クラス名");
 
 		superTestClassName = new Text(this, SWT.BORDER);
+		grd_h.verticalAlignment = SWT.CENTER;
 		superTestClassName.setLayoutData(grd_h);
-		this.setSize(new org.eclipse.swt.graphics.Point(386,128));
+		this.setSize(new Point(386, 53));
 	}
 
 	public String getSuperTestClassName(){

@@ -2,7 +2,10 @@ package com.homeserver.tamutamu.autosuitegen.dlgs;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -35,9 +38,10 @@ public class SelectSuperTestCaseDlg extends Dialog {
 	}
 
 	protected Control createDialogArea(Composite parent) {
-		super.createDialogArea(parent);
-		comp = new SelectSuperTestCaseComposite(parent, 0);
-		return comp;
+		parent.setLayout(new GridLayout(1, true));
+		comp = new SelectSuperTestCaseComposite(parent, SWT.NONE);
+		//super.createDialogArea(parent);
+		return parent;
 	}
 
 	protected void buttonPressed(int buttonId) {

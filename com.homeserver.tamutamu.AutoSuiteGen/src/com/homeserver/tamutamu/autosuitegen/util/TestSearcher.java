@@ -2,16 +2,22 @@ package com.homeserver.tamutamu.autosuitegen.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -20,7 +26,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
-import org.eclipse.jdt.internal.core.search.matching.SuperTypeReferencePattern;
 
 public class TestSearcher {
 	public IType[] findAll(IJavaProject project, IProgressMonitor pm)
@@ -86,79 +91,70 @@ public class TestSearcher {
 		SearchPattern parentTestCase_ptn = SearchPattern.createPattern(
 				PreferenceUtil.getTestCaseNamePTN(),
 				IJavaSearchConstants.CLASS, IJavaSearchConstants.DECLARATIONS,
-				SearchPattern.R_PATTERN_MATCH);
+				SearchPattern.R_REGEXP_MATCH);
 
-/*		// 検索パターン登録
-		SearchPattern pattern_TestCase = null;
-		SearchPattern tmp_pattern_TestCase;
-		boolean initFlg = true;
+		/*
+		 * // 検索パターン登録 SearchPattern pattern_TestCase = null; SearchPattern
+		 * tmp_pattern_TestCase; boolean initFlg = true;
+		 * 
+		 * for (String parentTestCase : PreferenceUtil.getParentTestCaseList())
+		 * {
+		 * 
+		 * tmp_pattern_TestCase = SearchPattern.createPattern(parentTestCase,
+		 * IJavaSearchConstants.CLASS,
+		 * IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE,
+		 * SearchPattern.R_EXACT_MATCH);
+		 * 
+		 * if (initFlg) { pattern_TestCase = tmp_pattern_TestCase; initFlg =
+		 * false; continue; }
+		 * 
+		 * pattern_TestCase = SearchPattern.createOrPattern(pattern_TestCase,
+		 * tmp_pattern_TestCase);
+		 * 
+		 * }
+		 */
 
-		for (String parentTestCase : PreferenceUtil.getParentTestCaseList()) {
+		/*
+		 * SearchPattern pattern_RunWith = SearchPattern.createPattern(
+		 * "org.junit.runner.RunWith", IJavaSearchConstants.ANNOTATION_TYPE,
+		 * IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
+		 * SearchPattern.R_EXACT_MATCH);
+		 */
 
-			tmp_pattern_TestCase = SearchPattern.createPattern(parentTestCase,
-					IJavaSearchConstants.CLASS,
-					IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE,
-					SearchPattern.R_EXACT_MATCH);
-
-			if (initFlg) {
-				pattern_TestCase = tmp_pattern_TestCase;
-				initFlg = false;
-				continue;
-			}
-
-			pattern_TestCase = SearchPattern.createOrPattern(pattern_TestCase,
-					tmp_pattern_TestCase);
-
-		}*/
-
-/*		SearchPattern pattern_RunWith = SearchPattern.createPattern(
-				"org.junit.runner.RunWith",
-				IJavaSearchConstants.ANNOTATION_TYPE,
-				IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE,
-				SearchPattern.R_EXACT_MATCH);*/
-
-/*		// マッチング処理
-		SearchRequestor requestor_TestCase = new SearchRequestor() {
-			public void acceptSearchMatch(SearchMatch match) {
-				System.out.println(match.getElement());
-
-				if (!(match.getElement() instanceof IType))
-					return;
-
-				IType type = (IType) match.getElement();
-				list.add(type);
-			}
-		};*/
+		/*
+		 * // マッチング処理 SearchRequestor requestor_TestCase = new SearchRequestor()
+		 * { public void acceptSearchMatch(SearchMatch match) {
+		 * System.out.println(match.getElement());
+		 * 
+		 * if (!(match.getElement() instanceof IType)) return;
+		 * 
+		 * IType type = (IType) match.getElement(); list.add(type); } };
+		 */
 
 		SearchRequestor requestor_ParentTestCaseName = new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) {
-				System.out.println(match.getElement());
 
 				if (!(match.getElement() instanceof IType))
 					return;
-
+				JavaCore.createClassFileFrom(null);
 				IType type = (IType) match.getElement();
-				System.out.println("■" + type.getElementName());
-				try {
-					ITypeHierarchy ith = type.newSupertypeHierarchy(new NullProgressMonitor());
-					if(ith.contains(project.findType("junit.framework.TestCase"))){
-						System.out.println("!!!!! HIT !!!!!");
-					}
-				} catch (JavaModelException e) {
-					// TODO 自動生成された catch ブロック
-					e.printStackTrace();
-				}
-				list.add(type);
+				// IClassFile classFile =
+				// JavaCore.createClassFileFrom(type.getResource().getf);
+				ResourcesPlugin.getWorkspace().getRoot()
+						.getFile(type.getPath());
+
+				IClassFile icf = type.getPackageFragment().getClassFile(
+						type.getFullyQualifiedName() + ".class");
+
 			}
 		};
 
-/*		SearchRequestor requestor_RunWith = new SearchRequestor() {
-			public void acceptSearchMatch(SearchMatch match) {
-				System.out.println(match.getElement());
-				IType type = (IType) match.getElement();
-				list.add(type);
-			}
-		};*/
+		/*
+		 * SearchRequestor requestor_RunWith = new SearchRequestor() { public
+		 * void acceptSearchMatch(SearchMatch match) {
+		 * System.out.println(match.getElement()); IType type = (IType)
+		 * match.getElement(); list.add(type); } };
+		 */
 
 		try {
 			SearchEngine searchEngine = new SearchEngine();
@@ -168,15 +164,15 @@ public class TestSearcher {
 							.getDefaultSearchParticipant() }, scope,
 					requestor_ParentTestCaseName, null);
 
-/*			searchEngine.search(pattern_RunWith,
-					new SearchParticipant[] { SearchEngine
-							.getDefaultSearchParticipant() }, scope,
-					requestor_RunWith, null);
-
-			searchEngine.search(pattern_TestCase,
-					new SearchParticipant[] { SearchEngine
-							.getDefaultSearchParticipant() }, scope,
-					requestor_TestCase, null);*/
+			/*
+			 * searchEngine.search(pattern_RunWith, new SearchParticipant[] {
+			 * SearchEngine .getDefaultSearchParticipant() }, scope,
+			 * requestor_RunWith, null);
+			 * 
+			 * searchEngine.search(pattern_TestCase, new SearchParticipant[] {
+			 * SearchEngine .getDefaultSearchParticipant() }, scope,
+			 * requestor_TestCase, null);
+			 */
 
 		} catch (CoreException e) {
 			// TODO 自動生成された catch ブロック
@@ -187,4 +183,39 @@ public class TestSearcher {
 
 	}
 
+	public static boolean matchingTestClass(IJavaProject project, IType type) {
+		try {
+			ITypeHierarchy ith = type
+					.newSupertypeHierarchy(new NullProgressMonitor());
+
+			final String testCaseNamePTN = PreferenceUtil.getTestCaseNamePTN();
+
+			Pattern pattern = Pattern.compile(testCaseNamePTN);
+			if (!(pattern.matcher(type.getFullyQualifiedName()).matches()))
+				return false;
+
+			final String[] parentTestCaseList = PreferenceUtil
+					.getParentTestCaseList();
+
+			if(parentTestCaseList.length == 0) return true;
+			
+			// 親テストクラスによる絞込み
+			for (String parentTestCase : parentTestCaseList) {
+				if (ith.contains(project.findType(parentTestCase))) {
+					return true;
+				}
+			}
+
+//			// RunWithアノテーションの有無
+//			IAnnotation anno = type.getAnnotation("RunWith");
+//			if (anno.exists()) {
+//				return true;
+//			}
+
+		} catch (JavaModelException e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
 }
