@@ -54,9 +54,6 @@ public class RunAction implements IObjectActionDelegate {
 
 		try {
 
-			IType[] types = new TestSearcher().findAll(project,
-					new NullProgressMonitor());
-
 			final IFolder destFolder = project.getProject().getFolder(
 					"src/test/java");
 

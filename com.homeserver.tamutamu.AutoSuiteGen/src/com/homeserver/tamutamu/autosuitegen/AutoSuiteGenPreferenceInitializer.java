@@ -3,7 +3,7 @@ package com.homeserver.tamutamu.autosuitegen;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import com.homeserver.tamutamu.autosuitegen.util.PreferenceUtil;
+import com.homeserver.tamutamu.autosuitegen.util.ProjectPropertyUtil;
 
 public class AutoSuiteGenPreferenceInitializer extends AbstractPreferenceInitializer {
 
@@ -14,7 +14,7 @@ public class AutoSuiteGenPreferenceInitializer extends AbstractPreferenceInitial
     @Override
     public void initializeDefaultPreferences() {
         IPreferenceStore store = Activator.getDefault().getPreferenceStore();
-        store.setDefault(PreferenceUtil.TEST_CLASSNAME_PTN_KEY, "");
+        store.setDefault(ProjectPropertyUtil.TEST_CLASSNAME_PTN_KEY, "");
 
     }
 

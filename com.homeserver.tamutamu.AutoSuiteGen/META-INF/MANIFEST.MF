@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: AutoSuiteGen
 Bundle-SymbolicName: com.homeserver.tamutamu.AutoSuiteGen;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.0.1.qualifier
 Bundle-Activator: com.homeserver.tamutamu.autosuitegen.Activator
 Require-Bundle: org.eclipse.jdt.ui;bundle-version="3.7.1",
  org.eclipse.jdt;bundle-version="3.7.1",

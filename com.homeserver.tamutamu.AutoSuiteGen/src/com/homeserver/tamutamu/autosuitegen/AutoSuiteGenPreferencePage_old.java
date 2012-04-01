@@ -23,9 +23,9 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
-import com.homeserver.tamutamu.autosuitegen.util.PreferenceUtil;
+import com.homeserver.tamutamu.autosuitegen.util.ProjectPropertyUtil;
 
-public class AutoSuiteGenPreferencePage extends PreferencePage implements
+public class AutoSuiteGenPreferencePage_old extends PreferencePage implements
 		IWorkbenchPreferencePage {
 
 	private Text testClassName;
@@ -33,7 +33,7 @@ public class AutoSuiteGenPreferencePage extends PreferencePage implements
 	private Button buttonAdd = null;
 	private Button buttonRemove = null;
 
-	public AutoSuiteGenPreferencePage() {
+	public AutoSuiteGenPreferencePage_old() {
 		super("タイトル");
 		setMessage("Suite自動生成の設定です。");
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
@@ -42,11 +42,11 @@ public class AutoSuiteGenPreferencePage extends PreferencePage implements
 	/**
 	 * @wbp.parser.constructor
 	 */
-	public AutoSuiteGenPreferencePage(String title) {
+	public AutoSuiteGenPreferencePage_old(String title) {
 		super(title);
 	}
 
-	public AutoSuiteGenPreferencePage(String title, ImageDescriptor image) {
+	public AutoSuiteGenPreferencePage_old(String title, ImageDescriptor image) {
 		super(title, image);
 	}
 
@@ -75,7 +75,7 @@ public class AutoSuiteGenPreferencePage extends PreferencePage implements
 		testClassName.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		testClassName.setToolTipText("テストクラス名のパターンを正規表現で指定してください。");
 		testClassName.setText(store
-				.getString(PreferenceUtil.TEST_CLASSNAME_PTN_KEY));
+				.getString(ProjectPropertyUtil.TEST_CLASSNAME_PTN_KEY));
 
 		// 2. 親テストクラスによる絞込み
 		Group gp2 = new Group(mainComp, SWT.NONE);
@@ -173,36 +173,36 @@ public class AutoSuiteGenPreferencePage extends PreferencePage implements
 	protected void performDefaults() {
 		IPreferenceStore store = getPreferenceStore();
 		String str = store
-				.getDefaultString(PreferenceUtil.TEST_CLASSNAME_PTN_KEY);
+				.getDefaultString(ProjectPropertyUtil.TEST_CLASSNAME_PTN_KEY);
 		testClassName.setText(str);
 		super.performDefaults();
 	}
 
 	public void doLoad() {
-		String[] parentTestCase = PreferenceUtil.getParentTestCaseList();
-
-		for (int i = 0; i < parentTestCase.length; i++) {
-			superTestCaseList.setData(parentTestCase[i], parentTestCase[i]);
-			superTestCaseList.add(parentTestCase[i]);
-		}
-
-		if (superTestCaseList.getItemCount() > 0) {
-			superTestCaseList.select(0);
-		}
+//		String[] parentTestCase = PreferenceUtil.getParentTestCaseList();
+//
+//		for (int i = 0; i < parentTestCase.length; i++) {
+//			superTestCaseList.setData(parentTestCase[i], parentTestCase[i]);
+//			superTestCaseList.add(parentTestCase[i]);
+//		}
+//
+//		if (superTestCaseList.getItemCount() > 0) {
+//			superTestCaseList.select(0);
+//		}
 	}
 
 	public void doStore() {
 
 		IPreferenceStore store = getPreferenceStore();
 
-		store.setValue(PreferenceUtil.TEST_CLASSNAME_PTN_KEY,
+		store.setValue(ProjectPropertyUtil.TEST_CLASSNAME_PTN_KEY,
 				testClassName.getText());
 
 		String parentTestCase = "";
 		for (int i = 0; i < superTestCaseList.getItemCount(); i++) {
 			parentTestCase += (superTestCaseList.getItem(i) + ";");
 		}
-		store.setValue(PreferenceUtil.SUPER_TESTCLASS_LIST_KEY, parentTestCase);
+		store.setValue(ProjectPropertyUtil.SUPER_TESTCLASS_LIST_KEY, parentTestCase);
 	}
 
 }

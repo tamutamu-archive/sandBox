@@ -33,12 +33,17 @@
       </builder>
    </extension>
    <extension
+         id="jp.co.tis.xenlon.AutoSuiteGen.propertyPage"
          point="org.eclipse.ui.propertyPages">
       <page
             class="com.homeserver.tamutamu.autosuitegen.AutoSuiteGenPropertyPage"
-            id="jp.co.tis.xenlon.AutoSuiteGen.page"
-            name="Suite自動生成"
-            objectClass="org.eclipse.core.resources.IProject">
+            id="jp.co.tis.xenlon.AutoSuiteGen.propertyPageSub"
+            name="Suite自動生成">
+         <enabledWhen>
+            <instanceof
+                  value="org.eclipse.jdt.core.IJavaProject">
+            </instanceof>
+         </enabledWhen>
       </page>
    </extension>
    <extension
@@ -50,7 +55,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="com.homeserver.tamutamu.autosuitegen.AutoSuiteGenPreferencePage"
+            class="com.homeserver.tamutamu.autosuitegen.AutoSuiteGenPreferencePage_old"
             id="jp.co.tis.xenlon.AutoSuiteGen.PreferencePage"
             name="Suite自動生成">
       </page>

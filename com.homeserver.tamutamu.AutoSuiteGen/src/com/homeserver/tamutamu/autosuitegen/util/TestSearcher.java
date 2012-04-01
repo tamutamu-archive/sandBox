@@ -89,7 +89,7 @@ public class TestSearcher {
 				new IJavaElement[] { project }, false);
 
 		SearchPattern parentTestCase_ptn = SearchPattern.createPattern(
-				PreferenceUtil.getTestCaseNamePTN(),
+				ProjectPropertyUtil.getTestCaseNamePTN(project.getProject()),
 				IJavaSearchConstants.CLASS, IJavaSearchConstants.DECLARATIONS,
 				SearchPattern.R_REGEXP_MATCH);
 
@@ -188,14 +188,14 @@ public class TestSearcher {
 			ITypeHierarchy ith = type
 					.newSupertypeHierarchy(new NullProgressMonitor());
 
-			final String testCaseNamePTN = PreferenceUtil.getTestCaseNamePTN();
+			final String testCaseNamePTN = ProjectPropertyUtil.getTestCaseNamePTN(project.getProject());
 
 			Pattern pattern = Pattern.compile(testCaseNamePTN);
 			if (!(pattern.matcher(type.getFullyQualifiedName()).matches()))
 				return false;
 
-			final String[] parentTestCaseList = PreferenceUtil
-					.getParentTestCaseList();
+			final String[] parentTestCaseList = ProjectPropertyUtil
+					.getParentTestCaseList(project.getProject());
 
 			if(parentTestCaseList.length == 0) return true;
 			
