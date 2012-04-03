@@ -18,11 +18,8 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IObjectActionDelegate;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import com.homeserver.tamutamu.autosuitegen.util.TestSearcher;
@@ -32,17 +29,6 @@ public class RunAction implements IObjectActionDelegate {
 	ISelection selection;
 
 	public RunAction() {
-		// TODO 自動生成されたコンストラクター・スタブ
-	}
-
-	@Override
-	public void run(IAction action) {
-		IStructuredSelection structured = (IStructuredSelection) selection;
-		IProject type = (IProject) structured.getFirstElement();
-
-		IJavaProject javaProject = JavaCore.create(type);
-
-		createAllTestsuite(javaProject);
 	}
 
 	@Override
@@ -50,7 +36,23 @@ public class RunAction implements IObjectActionDelegate {
 		this.selection = selection;
 	}
 
-	public void createAllTestsuite(final IJavaProject project) {
+	@Override
+	public void run(IAction action) {
+		// 選択されたプロジェクトを取得
+		IStructuredSelection structured = (IStructuredSelection) selection;
+		IProject type = (IProject) structured.getFirstElement();
+		IJavaProject javaProject = JavaCore.create(type);
+
+		// Suite作成
+		this.createAllTestsuite(javaProject);
+	}
+
+	/**
+	 * Suite作成のルートメソッド。
+	 * 
+	 * @param project
+	 */
+	private void createAllTestsuite(final IJavaProject project) {
 
 		try {
 
@@ -66,14 +68,15 @@ public class RunAction implements IObjectActionDelegate {
 					.getWorkbench().getActiveWorkbenchWindow().getShell());
 
 			try {
+				
+				// 進捗ダイアログを表示して、Suiteを作成する。
 				dialog.run(true, true, new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor)
 							throws InvocationTargetException,
 							InterruptedException {
 
 						try {
-
-							monitor.beginTask("テストスイートの作成中です。。", pkgCnt);
+							monitor.beginTask("テストスイートの作成中です。", pkgCnt);
 							for (IJavaElement el : project
 									.getPackageFragmentRoot(destFolder)
 									.getChildren()) {
@@ -85,10 +88,10 @@ public class RunAction implements IObjectActionDelegate {
 									monitor.subTask("");
 									if (el.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 
-										existSuiteTestRemove(project,
+										existSuiteClassRemove(project,
 												(IPackageFragment) el);
 
-										ICompilationUnit cu = createSuiteClassFromPkg(
+										ICompilationUnit cu = createSuiteClass(
 												project, (IPackageFragment) el);
 										if (cu == null) {
 											monitor.worked(1);
@@ -105,13 +108,11 @@ public class RunAction implements IObjectActionDelegate {
 							}
 							monitor.done();
 						} catch (JavaModelException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
 				});
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -122,25 +123,34 @@ public class RunAction implements IObjectActionDelegate {
 					suiteClasses_stmt.length());
 			suiteClasses_stmt.append(" })\n");
 
-			this.existSuiteTestRemove(project,
+			this.existSuiteClassRemove(project,
 					project.getPackageFragmentRoot(destFolder)
 							.getPackageFragment(""));
-			this.createSuiteClass(project.getPackageFragmentRoot(destFolder)
-					.createPackageFragment("allsuite", true, null), suiteClasses_stmt);
+			this.createSuiteCU(project.getPackageFragmentRoot(destFolder)
+					.createPackageFragment("allsuite", true, null),
+					suiteClasses_stmt);
 
 		} catch (JavaModelException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private ICompilationUnit createSuiteClassFromPkg(IJavaProject project,
+	/**
+	 * パッケージ単位でSuiteクラスを作成します。
+	 * 
+	 * @param project
+	 * @param pkf
+	 * @return Suiteクラス
+	 * @throws JavaModelException
+	 */
+	private ICompilationUnit createSuiteClass(IJavaProject project,
 			IPackageFragment pkf) throws JavaModelException {
 
-		StringBuilder suiteClasses_stmt = new StringBuilder();
-
-		// 　アノテーション
 		if (pkf.getChildren() == null || pkf.getChildren().length == 0)
 			return null;
+		
+		StringBuilder suiteClasses_stmt = new StringBuilder();
+		
 		for (IJavaElement testClass : pkf.getChildren()) {
 
 			if (testClass.getElementType() == IJavaElement.COMPILATION_UNIT) {
@@ -149,6 +159,7 @@ public class RunAction implements IObjectActionDelegate {
 				if (icu.getElementName().equals("AllTests.java"))
 					continue;
 
+				// 対象の絞込み
 				if (!TestSearcher.matchingTestClass(project,
 						icu.getAllTypes()[0]))
 					continue;
@@ -165,22 +176,18 @@ public class RunAction implements IObjectActionDelegate {
 				suiteClasses_stmt.length());
 		suiteClasses_stmt.append(" })\n");
 
-		return this.createSuiteClass(pkf, suiteClasses_stmt);
+		return this.createSuiteCU(pkf, suiteClasses_stmt);
 	}
 
-	private void existSuiteTestRemove(IJavaProject project, IPackageFragment pkf)
-			throws JavaModelException {
-		IType suite = project.findType(pkf.getElementName() + ".AllTests");
-		ICompilationUnit cu = null;
-
-		if (suite != null) {
-			cu = suite.getCompilationUnit();
-			cu.delete(true, new NullProgressMonitor());
-			cu.discardWorkingCopy();
-		}
-	}
-
-	private ICompilationUnit createSuiteClass(IPackageFragment pkf,
+	/**
+	 * {@code @SuiteClasses}文字列からCUを作成します。
+	 * 
+	 * @param pkf
+	 * @param suiteClasses_stmt
+	 * @return CU
+	 * @throws JavaModelException
+	 */
+	private ICompilationUnit createSuiteCU(IPackageFragment pkf,
 			StringBuilder suiteClasses_stmt) throws JavaModelException {
 
 		IProgressMonitor pm = new NullProgressMonitor();
@@ -213,10 +220,27 @@ public class RunAction implements IObjectActionDelegate {
 		return cu;
 	}
 
+	/**
+	 * 指定のパッケージ配下にあるSuiteクラスを削除します。
+	 * 
+	 * @param project
+	 * @param pkf
+	 * @throws JavaModelException
+	 */
+	private void existSuiteClassRemove(IJavaProject project, IPackageFragment pkf)
+			throws JavaModelException {
+		IType suite = project.findType(pkf.getElementName() + ".AllTests");
+		ICompilationUnit cu = null;
+
+		if (suite != null) {
+			cu = suite.getCompilationUnit();
+			cu.delete(true, new NullProgressMonitor());
+			cu.discardWorkingCopy();
+		}
+	}
+	
 	@Override
 	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
-		// TODO 自動生成されたメソッド・スタブ
-
 	}
 
 }

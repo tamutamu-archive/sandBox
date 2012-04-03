@@ -14,8 +14,11 @@ public class ProjectPropertyUtil {
 	// テストクラス名
 	public static final String TEST_CLASSNAME_PTN_KEY = "TEST_CLASSNAME_PTN_KEY";
 
-	// 絞込み対象の親テストクラス
+	// 絞込み対象の親テストクラスの格納キー
 	public static final String SUPER_TESTCLASS_LIST_KEY = "SUPER_TESTCLASS_LIST_KEY";
+	
+	// 絞込み対象の@RunWithのテストランナーの格納キー
+	public static final String TESTRUNNER_LIST_KEY = "TESTRUNNER_LIST_KEY";
 
 	public static String getTestCaseNamePTN(IProject project) {
 		try {
@@ -29,12 +32,12 @@ public class ProjectPropertyUtil {
 		return null;
 	}
 
-	public static String[] getParentTestCaseList(IProject project) {
+	public static String[] getParentTestCaseList(IProject project, String key) {
 
 		try {
 
 			String tmp = project.getPersistentProperty(new QualifiedName(
-					Activator.PLUGIN_ID, SUPER_TESTCLASS_LIST_KEY));
+					Activator.PLUGIN_ID, key));
 
 			if (tmp != null) {
 				return parseString(tmp);

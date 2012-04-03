@@ -40,9 +40,9 @@
             id="jp.co.tis.xenlon.AutoSuiteGen.propertyPageSub"
             name="Suite自動生成">
          <enabledWhen>
-            <instanceof
-                  value="org.eclipse.jdt.core.IJavaProject">
-            </instanceof>
+            <adapt
+                  type="org.eclipse.core.resources.IProject">
+            </adapt>
          </enabledWhen>
       </page>
    </extension>
