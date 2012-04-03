@@ -46,19 +46,5 @@
          </enabledWhen>
       </page>
    </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="com.homeserver.tamutamu.autosuitegen.AutoSuiteGenPreferenceInitializer">
-      </initializer>
-   </extension>
-   <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            class="com.homeserver.tamutamu.autosuitegen.AutoSuiteGenPreferencePage_old"
-            id="jp.co.tis.xenlon.AutoSuiteGen.PreferencePage"
-            name="Suite自動生成">
-      </page>
-   </extension>
 
 </plugin>
