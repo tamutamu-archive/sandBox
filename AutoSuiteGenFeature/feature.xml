@@ -2,7 +2,7 @@
 <feature
       id="AutoSuiteGenFeature"
       label="AutoSuiteGenFeature"
-      version="1.0.0.qualifier">
+      version="0.0.1">
 
    <description url="http://www.example.com/description">
       [ここにフィーチャーの説明を入力してください。]
@@ -29,7 +29,7 @@
          id="com.homeserver.tamutamu.AutoSuiteGen"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.0.1"
          unpack="false"/>
 
 </feature>
